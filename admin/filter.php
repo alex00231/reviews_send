@@ -8,13 +8,13 @@ function generationArrForCheck () {
     $ifEmail = $_REQUEST['email'] != '' ? true : false; 
     $arr;
 
-    if ($ifName == 'true') {
+    if ($ifName == true) {
         $arr['name'] = $_REQUEST['name'];
     }
-    if ($ifSurname == 'true') {
+    if ($ifSurname == true) {
         $arr['surname'] = $_REQUEST['surname'];
     }
-    if ($ifEmail == 'true') {
+    if ($ifEmail == true) {
         $arr['email'] = $_REQUEST['email'];
     } 
 
@@ -61,7 +61,6 @@ function outputFilter ($arrRes, $mySQL) {
         }
     } 
 }
-
 ?>
 
 <!DOCTYPE html>

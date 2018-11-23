@@ -13,53 +13,70 @@ if ($mysqli->connect_error) {
 
 $date = date("Y-m-d");
 
-$nameInput = $_REQUEST['name'] != "" ? ", '". $_REQUEST['name'] ."'" : "";
-$surnameInput = $_REQUEST['surname'] != "" ? ", '". $_REQUEST['surname'] ."'" : "";
-$emailInput = $_REQUEST['email'] != "" ? $_REQUEST['email'] : false;
-$textInput = $_REQUEST['text'] != "" ? $_REQUEST['text'] : false;
+$ifUser = array(
+    'name' => $_REQUEST['name'] != "" ? ", `name`" : "",
+    'surname' => $_REQUEST['surname'] != "" ? ", `surname`" : ""
+);
 
-$ifName = $_REQUEST['name'] != "" ? ", `name`" : "";
-$ifSurname = $_REQUEST['surname'] != "" ? ", `surname`" : "";
+$arrInputUser = array(
+    'name' => $_REQUEST['name'] != "" ? $_REQUEST['name'] : false,
+    'surname' => $_REQUEST['surname'] != "" ? $_REQUEST['surname'] : false,
+);
 
-// function send_mail() {
+$arrInputSet = array(
+    'email' => $_REQUEST['email'] != "" ? $_REQUEST['email'] : false,
+    'text' => $_REQUEST['text'] != "" ? $_REQUEST['text'] : false
+);
+// 'email' => $_REQUEST['email'] != "" ? $_REQUEST['email'] : false,
+// 'text' => $_REQUEST['text'] != "" ? $_REQUEST['text'] : false
 
-// }
+print_r($arrInput);
 
-if ($emailInput != false && $textInput != false) {
-    $checkEmail = $mysqli -> query("SELECT * FROM `data_users` WHERE `email` = '$emailInput'");
+function generationSQL ($ifUser, $arrInputUser, $arrInputSet) {
+    $countArr = count($arrInputUser);
+    $sqlUser = "INSERT INTO `data_users` (`email`{$ifUser['name']} {$ifUser['surname']}) VALUES ('{$arrInputSet["email"]}'";
+    foreach ($arrInputUser as $key => $value) {
+        if ($value != false) {
+            $sqlUser .= ", '$value'";
+        }
+        ++$i;
+    }
+    $sqlUser .= ")";
+    return $sqlUser;
+}
+
+if ($arrInputSet['email'] != false && $arrInputSet['text'] != false) {
+    $checkEmail = $mysqli -> query("SELECT * FROM `data_users` WHERE `email` = '{$arrInputSet["email"]}'");
     if ($checkEmail -> num_rows > 0) {
         $arr = $checkEmail -> fetch_assoc();
         $nameArr = $arr['name'];
         $surnameArr = $arr['surname'];
-        if ($nameArr !== $nameInput && $nameInput !== "") {
-            $updateNameSQL = "UPDATE `data_users` SET `name` = '$nameInput' WHERE `email` = '$emailInput'";
+        if ($nameArr != $nameInput && $arrInputUser['name'] != false) {
+            $updateNameSQL = "UPDATE `data_users` SET `name` = '{$arrInputUser["name"]}' WHERE `email` = '{$arrInputSet["email"]}'";
             $mysqli -> query($updateNameSQL);
         }
-        if ($surnameArr !== $surnameInput && $surnameInput !== "") {
-            $updateSurnameSQL = "UPDATE `data_users` SET `surname` = '$surnameInput' WHERE `email` = '$emailInput'";
+        if ($surnameArr !== $surnameInput && $arrInputUser['surname'] != false) {
+            $updateSurnameSQL = "UPDATE `data_users` SET `surname` = '{$arrInputUser["surname"]}' WHERE `email` = '{$arrInputSet["email"]}'";
             $mysqli -> query($updateSurnameSQL);
         }
         $user_id = $arr['id'];
-        $sql = "INSERT INTO `data_reviews` (`review`, `date`, `id_user`) VALUES ('$textInput', '$date', '$user_id')";
+        $sql = "INSERT INTO `data_reviews` (`review`, `date`, `id_user`) VALUES ('{$arrInputSet["text"]}', '$date', '$user_id')";
         $mysqli -> query($sql);
     } else if ($checkEmail -> num_rows == 0) {
-        $userAddInSQL = "INSERT INTO `data_users` (`email`$ifName $ifSurname) VALUES ('$emailInput'$nameInput $surnameInput)";
+        $userAddInSQL = generationSQL($ifUser, $arrInputUser, $arrInputSet);
         $mysqli -> query($userAddInSQL);
-        $idNewUserSQL = "SELECT `id` FROM `data_users` WHERE `email` = '$emailInput'";
+        $idNewUserSQL = "SELECT `id` FROM `data_users` WHERE `email` = '{$arrInputSet["email"]}'";
         $checkID = $mysqli -> query($idNewUserSQL);
         if ($checkID -> num_rows == 1) {
             $user_id = $checkID -> fetch_assoc();
             $ID = $user_id['id'];
-            $newReviewSQL = "INSERT INTO `data_reviews` (`review`, `date`, `id_user`) VALUES ('$textInput', '$date', '$ID')";
+            $newReviewSQL = "INSERT INTO `data_reviews` (`review`, `date`, `id_user`) VALUES ('{$arrInputSet["text"]}', '$date', '$ID')";
             $mysqli -> query($newReviewSQL);
         } else {
             echo "Произошла ощибка";
         }
     }
 }
-
-// $mysqli -> 
-
 
 ?>
 
